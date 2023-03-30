@@ -1,0 +1,14 @@
+query Locations {
+  locations {
+    results {
+      __typename
+      ...locationFields
+      dimension
+      residents {
+        id
+        status
+        created
+      }
+    }
+  }
+}

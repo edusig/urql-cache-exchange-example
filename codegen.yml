@@ -1,0 +1,47 @@
+---
+overwrite: true
+schema: 'https://rickandmortyapi.com/graphql'
+documents: './src/graphql/**/*.gql'
+
+generates:
+  src/graphql/_gen/types.d.ts:
+    plugins:
+      - typescript
+    config:
+      skipTypename: true
+      scalars:
+        Date: Date
+        DateTime: Date
+        Decimal: number
+        UUID: string
+        GlobalID: string
+        Markdown: string
+        Slug: string
+        PhoneNumber: string
+    # hooks:
+    #   afterOneFileWrite:
+    #     - prettier --write
+  src/graphql:
+    preset: near-operation-file
+    presetConfig:
+      extension: .ts
+      baseTypesPath: ./_gen/types.d.ts
+      folder: _gen
+    plugins:
+      - typescript-operations
+      # - typescript-react-apollo
+      - typescript-urql
+    config:
+      skipTypename: true
+      scalars:
+        Date: Date
+        DateTime: Date
+        Decimal: number
+        UUID: string
+        GlobalID: string
+        Markdown: string
+        Slug: string
+        PhoneNumber: string
+    # hooks:
+    #   afterOneFileWrite:
+    #     - prettier --write

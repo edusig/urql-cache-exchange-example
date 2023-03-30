@@ -1,11 +1,90 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from '@/styles/Home.module.css'
+import { Page } from '@/get-page-type';
+import {
+  CharactersDocument,
+  CharactersQuery,
+  CharactersQueryVariables,
+  useCharactersQuery,
+} from '@/graphql/_gen/characters';
+import {
+  EpisodesDocument,
+  EpisodesQuery,
+  EpisodesQueryVariables,
+  useEpisodesQuery,
+} from '@/graphql/_gen/episodes';
+import {
+  LocationsDocument,
+  LocationsQuery,
+  LocationsQueryVariables,
+  useLocationsQuery,
+} from '@/graphql/_gen/locations';
+import { withServerGraphQLClient } from '@/graphql/with-graphql-client';
+import { GetServerSideProps } from 'next';
+import Head from 'next/head';
+import { FC, ReactNode } from 'react';
 
-const inter = Inter({ subsets: ['latin'] })
+export const getServerSideProps: GetServerSideProps = withServerGraphQLClient(
+  async ({ client }) => {
+    try {
+      await client
+        .query<CharactersQuery, CharactersQueryVariables>(CharactersDocument, {})
+        .toPromise();
+      await client
+        .query<LocationsQuery, LocationsQueryVariables>(LocationsDocument, {})
+        .toPromise();
+      await client.query<EpisodesQuery, EpisodesQueryVariables>(EpisodesDocument, {}).toPromise();
+    } catch (e) {
+      console.error(e);
+    }
+    return { props: {} };
+  },
+);
 
-export default function Home() {
+const Layout: FC<{ children: ReactNode }> = ({ children }) => {
+  const [episodesQ] = useEpisodesQuery();
+  console.log(episodesQ);
+  return (
+    <div>
+      <h2>Layout</h2>
+      {children}
+      <h3>Episodes ({episodesQ.data?.episodes?.results?.length ?? 0})</h3>
+      <Episodes />
+    </div>
+  );
+};
+
+const Episodes: FC = () => {
+  const [episodesQ] = useEpisodesQuery();
+  return (
+    <ul>
+      {episodesQ.data?.episodes?.results?.map((it) => (
+        <li key={it?.id}>
+          Id: {it?.id} | Name: {it?.name} | Characters:{' '}
+          {it?.characters.map((it) => it?.id).join(',')}
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+const Locations: FC = () => {
+  const [locationsQ] = useLocationsQuery();
+  return (
+    <ul>
+      {locationsQ.data?.locations?.results?.map((it) => (
+        <li key={it?.id}>
+          Id: {it?.id} | Name: {it?.name} | Dimension: {it?.dimension} | Residentes:{' '}
+          {it?.residents.map((it) => it?.id).join(',')}
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+const Home: Page = () => {
+  const [charactersQ] = useCharactersQuery();
+  const [locationsQ] = useLocationsQuery();
+  console.log(charactersQ);
+  console.log(locationsQ);
   return (
     <>
       <Head>
@@ -14,110 +93,25 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
-        <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>src/pages/index.tsx</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{' '}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
-        </div>
-
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
-          />
-          <div className={styles.thirteen}>
-            <Image
-              src="/thirteen.svg"
-              alt="13"
-              width={40}
-              height={31}
-              priority
-            />
-          </div>
-        </div>
-
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
-        </div>
+      <main>
+        <h3>Characters</h3>
+        <ul>
+          {charactersQ.data?.characters?.results?.map((it) => (
+            <li key={it?.id}>
+              Id: {it?.id} | Name: {it?.name} | Location ID: {it?.location?.id} | Episodes:{' '}
+              {it?.episode.map((it) => it?.id).join(',')}
+            </li>
+          ))}
+        </ul>
+        <h3>Locations ({locationsQ.data?.locations?.results?.length ?? 0})</h3>
+        <Locations />
       </main>
     </>
-  )
-}
+  );
+};
+
+Home.getLayout = (page: ReactNode) => {
+  return <Layout>{page}</Layout>;
+};
+
+export default Home;

@@ -1,0 +1,17 @@
+query Episodes {
+  episodes {
+    results {
+      __typename
+      id
+      name
+      characters {
+        id
+        name
+        location {
+          id
+          dimension
+        }
+      }
+    }
+  }
+}

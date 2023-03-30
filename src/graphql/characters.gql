@@ -1,0 +1,16 @@
+query Characters {
+  characters {
+    results {
+      __typename
+      id
+      name
+      location {
+        ...locationFields
+      }
+      episode {
+        id
+        episode
+      }
+    }
+  }
+}
