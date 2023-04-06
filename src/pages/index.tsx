@@ -1,10 +1,5 @@
 import { Page } from '@/get-page-type';
-import {
-  CharactersDocument,
-  CharactersQuery,
-  CharactersQueryVariables,
-  useCharactersQuery,
-} from '@/graphql/_gen/characters';
+import { useCharactersQuery } from '@/graphql/_gen/characters';
 import {
   EpisodesDocument,
   EpisodesQuery,
@@ -17,27 +12,20 @@ import {
   LocationsQueryVariables,
   useLocationsQuery,
 } from '@/graphql/_gen/locations';
-import { withServerGraphQLClient } from '@/graphql/with-graphql-client';
-import { GetServerSideProps } from 'next';
+import { withStaticGraphQLClient } from '@/graphql/with-graphql-client';
+import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import { FC, ReactNode } from 'react';
 
-export const getServerSideProps: GetServerSideProps = withServerGraphQLClient(
-  async ({ client }) => {
-    try {
-      await client
-        .query<CharactersQuery, CharactersQueryVariables>(CharactersDocument, {})
-        .toPromise();
-      await client
-        .query<LocationsQuery, LocationsQueryVariables>(LocationsDocument, {})
-        .toPromise();
-      await client.query<EpisodesQuery, EpisodesQueryVariables>(EpisodesDocument, {}).toPromise();
-    } catch (e) {
-      console.error(e);
-    }
-    return { props: {} };
-  },
-);
+export const getStaticProps: GetStaticProps = withStaticGraphQLClient(async (client) => {
+  try {
+    await client.query<LocationsQuery, LocationsQueryVariables>(LocationsDocument, {}).toPromise();
+    await client.query<EpisodesQuery, EpisodesQueryVariables>(EpisodesDocument, {}).toPromise();
+  } catch (e) {
+    console.error(e);
+  }
+  return { props: {}, revalidate: 1 };
+});
 
 const Layout: FC<{ children: ReactNode }> = ({ children }) => {
   const [episodesQ] = useEpisodesQuery();
@@ -100,6 +88,7 @@ const Home: Page = () => {
             <li key={it?.id}>
               Id: {it?.id} | Name: {it?.name} | Location ID: {it?.location?.id} | Episodes:{' '}
               {it?.episode.map((it) => it?.id).join(',')}
+              Episodes aired at: {it?.episodeAlias.map((it) => it?.air_date).join(', ')}
             </li>
           ))}
         </ul>

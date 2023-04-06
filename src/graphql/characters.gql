@@ -11,6 +11,10 @@ query Characters {
         id
         episode
       }
+      episodeAlias: episode {
+        id
+        air_date
+      }
     }
   }
 }

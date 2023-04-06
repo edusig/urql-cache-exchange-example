@@ -45,3 +45,19 @@ generates:
     # hooks:
     #   afterOneFileWrite:
     #     - prettier --write
+  src/graphql/_gen/custom-scalar-resolvers.ts:
+    plugins:
+      - src/graphql/codegen-plugins/custom-scalar-resolvers.js
+    config:
+      scalars:
+        Date: transformToDate
+        DateTime: transformToDate
+        Decimal: transformToFloat
+  src/graphql/_gen/custom-scalar-input-serializer.ts:
+    plugins:
+      - src/graphql/codegen-plugins/custom-scalar-input-serializer.js
+    config:
+      scalars:
+        - Date
+        - DateTime
+        - Decimal
